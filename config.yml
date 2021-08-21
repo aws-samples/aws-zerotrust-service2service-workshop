@@ -1,0 +1,33 @@
+description: >
+    Static variables used in the CDK stacks are defined here. 
+    This is only to reduce the rework when updating names, etc., in the CDK code for the workshop. 
+
+lambda_timeout: 60
+instance_type: "t3.micro"
+
+main_vpc_cidr: "10.199.0.0/16"
+allowed_cidr: &allowed_cidr "10.199.0.0/24"
+other_vpc_cidr: *allowed_cidr
+
+api_resource: "orders"
+
+api_resource_policy:
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Principal": "*",
+                "Action": "execute-api:Invoke",
+                "Resource": "arn:aws:execute-api:*:*:*",
+                "Condition": {
+                    "IpAddress": {
+                        "aws:VpcSourceIp": *allowed_cidr
+                    }
+                }
+            }
+        ]
+    }
+
+# Systems Manager parameters
+params_path: "/workshop/params/"

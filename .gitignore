@@ -1,0 +1,20 @@
+*.swp
+package-lock.json
+__pycache__
+.pytest_cache
+.env
+.venv
+*.egg-info
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+
+# VS Code stuff
+*.code-workspace
+.vscode/*
+.DS_Store
+
+# etc.
+src/lambda/layer/python
+src/ec2/.env
