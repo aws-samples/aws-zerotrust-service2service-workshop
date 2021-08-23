@@ -56,10 +56,11 @@ cdk synth <StackName>
 ### Specific to this app
 ```bash
 # While in the root directory of this repo:
-pip install aws_requests_auth -t src/lambda/layer/python
+pip3 install aws_requests_auth -t src/lambda/layer/python
 ```
-Why? I create a Lambda layer that contains the `aws_requests_auth` package used by Lambda functions. I avoid pushing all the package's files to the repo (.gitignore). So we need to pip install the package after cloning this repo. Then at `cdk deploy` time CDK uses packages installed in `./src/lambda/layer/python` to create the Lambda Layer.
+Why? I create a Lambda layer that contains the `aws_requests_auth` package used by Lambda functions. I avoid pushing the package's files to the repo (.gitignore). So you need to pip install the package after cloning this repo. Then at `cdk deploy` time CDK uses packages installed in `./src/lambda/layer/python` to create the Lambda Layer.
 
+<!-- TODO instruction for lambda from asset vs. bucket -->
 
 ## Useful commands
 
