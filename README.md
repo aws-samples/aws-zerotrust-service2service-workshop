@@ -17,41 +17,34 @@ High Level Architecture:
 # How To Use 
 
 ## Requirements
-1. python3
-2. node
-3. aws-cdk
+-  python3
+- node
+- aws-cdk
 
+## Steps
+1. Clone this repo & `cd aws-zerotrust-service2service-workshop`
 
-## Need to know, but nothing to do
-This project is initialized by `cdk init` and has the standard structure of a Python project.
+1. Create and activate virtual environment:
+    ```bash
+    python3 -m venv .venv
+    source .venv/bin/activate
+    ```
 
-The initialization process creates a virtualenv within this project, stored under the `.venv`
-directory.
+1. Once the virtual environment is activated, install the required dependencies:
 
-## Do
-activate the virtualenv:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-```bash
-source .venv/bin/activate
-```
+1. You should now be able to run CDK commands. Start by listing available stacks:
+    ```bash
+    cdk ls
+    ```
 
-Once the virtualenv is activated, install the required dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-see what stacks are available:
-
-```bash
-cdk ls
-```
-
-now synthesize the CloudFormation template(s) for this code:
-
-```bash
-cdk synth <StackName>
-```
+1. For example, if you want to synthesize the CloudFormation template for a stack:
+    ```bash
+    cdk synth <StackName>
+    ```
 
 ### Specific to this app
 ```bash
@@ -60,7 +53,10 @@ pip3 install aws_requests_auth -t src/lambda/layer/python
 ```
 Why? I create a Lambda layer that contains the `aws_requests_auth` package used by Lambda functions. I avoid pushing the package's files to the repo (.gitignore). So you need to pip install the package after cloning this repo. Then at `cdk deploy` time CDK uses packages installed in `./src/lambda/layer/python` to create the Lambda Layer.
 
-<!-- TODO instruction for lambda from asset vs. bucket -->
+<!-- TODO instruction for:
+    lambda from asset vs. bucket
+    deploy locally, bootstrap, etc.
+-->
 
 ## Useful commands
 
@@ -72,11 +68,13 @@ Why? I create a Lambda layer that contains the `aws_requests_auth` package used 
 
 
  ## Repo structure
+This project is initialized by `cdk init` and has the standard structure of a Python project.
+
 <!-- TODO: complete -->
 ```markdown
 .
 ├── app.py                                  <-- The entry point for this application.
-├── config.yml                              <-- [Not a CDK thing] Where the static variables used in this app are defined.
+├── config.yml                              <-- [Not a CDK thing] Static variables used in this app.
 ├── README.md                               <-- This instructions file
 ├── setup.py                                <-- 
 ├── src                                     <-- Directory for Lambda and EC2 source codes
