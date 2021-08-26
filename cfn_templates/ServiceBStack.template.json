@@ -1,0 +1,1418 @@
+{
+  "Parameters": {
+    "EEAssetsBucket": {
+      "Type": "String",
+      "Description": "Region-specific assets S3 bucket name."
+    },
+    "EEAssetsKeyPrefix": {
+      "Type": "String",
+      "Description": "S3 key prefix where this modules assets are stored. (e.g. modules/my_module/v1/)"
+    }
+  },
+  "Resources": {
+    "OrdersTable315BB997": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "KeySchema": [
+          {
+            "AttributeName": "order_id",
+            "KeyType": "HASH"
+          }
+        ],
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "order_id",
+            "AttributeType": "S"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5
+        },
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountB"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceB"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/OrdersTable/Resource"
+      }
+    },
+    "DDBInitLambdaServiceRole3DD2CE49": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountB"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceB"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/DDBInitLambda/ServiceRole/Resource"
+      }
+    },
+    "DDBInitLambdaServiceRoleDefaultPolicy8008F5BF": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "OrdersTable315BB997",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "DDBInitLambdaServiceRoleDefaultPolicy8008F5BF",
+        "Roles": [
+          {
+            "Ref": "DDBInitLambdaServiceRole3DD2CE49"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/DDBInitLambda/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "DDBInitLambdaF97CE5FA": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "EEAssetsBucket"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Ref": "EEAssetsKeyPrefix"
+                },
+                "lambda/ddbinit/lambda-code.zip"
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "DDBInitLambdaServiceRole3DD2CE49",
+            "Arn"
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "TABLE_NAME": {
+              "Ref": "OrdersTable315BB997"
+            }
+          }
+        },
+        "Handler": "lambda_function.lambda_handler",
+        "Runtime": "python3.8",
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountB"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceB"
+          }
+        ],
+        "Timeout": 60
+      },
+      "DependsOn": [
+        "DDBInitLambdaServiceRoleDefaultPolicy8008F5BF",
+        "DDBInitLambdaServiceRole3DD2CE49"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/DDBInitLambda/Resource"
+      }
+    },
+    "DDBInit": {
+      "Type": "AWS::CloudFormation::CustomResource",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "DDBInitLambdaF97CE5FA",
+            "Arn"
+          ]
+        }
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/DDBInit/Default"
+      }
+    },
+    "BackendLambdaServiceRole98E4BC89": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountB"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceB"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/BackendLambda/ServiceRole/Resource"
+      }
+    },
+    "BackendLambdaServiceRoleDefaultPolicy922C20D8": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "OrdersTable315BB997",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "BackendLambdaServiceRoleDefaultPolicy922C20D8",
+        "Roles": [
+          {
+            "Ref": "BackendLambdaServiceRole98E4BC89"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/BackendLambda/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "BackendLambdaD93C7B96": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "EEAssetsBucket"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Ref": "EEAssetsKeyPrefix"
+                },
+                "lambda/backend/lambda-code.zip"
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "BackendLambdaServiceRole98E4BC89",
+            "Arn"
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "TABLE_NAME": {
+              "Ref": "OrdersTable315BB997"
+            }
+          }
+        },
+        "Handler": "lambda_function.lambda_handler",
+        "Runtime": "python3.8",
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountB"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceB"
+          }
+        ],
+        "Timeout": 60
+      },
+      "DependsOn": [
+        "BackendLambdaServiceRoleDefaultPolicy922C20D8",
+        "BackendLambdaServiceRole98E4BC89"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/BackendLambda/Resource"
+      }
+    },
+    "LogGroup0B487484F": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "BackendLambdaD93C7B96"
+              }
+            ]
+          ]
+        },
+        "RetentionInDays": 731
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/LogGroup0/Resource"
+      }
+    },
+    "LogGroup106AAD846": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "DDBInitLambdaF97CE5FA"
+              }
+            ]
+          ]
+        },
+        "RetentionInDays": 731
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/LogGroup1/Resource"
+      }
+    },
+    "APISecretDDFC1759": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "GenerateSecretString": {
+          "ExcludePunctuation": true
+        },
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountB"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceB"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/APISecret/Resource"
+      }
+    },
+    "APIAccessLogs06429C94": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "RetentionInDays": 731
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/APIAccessLogs/Resource"
+      }
+    },
+    "ServiceBAPIE44D7D31": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "EndpointConfiguration": {
+          "Types": [
+            "PRIVATE"
+          ]
+        },
+        "Name": "ServiceBAPI",
+        "Policy": {
+          "Statement": [
+            {
+              "Action": "execute-api:Invoke",
+              "Condition": {
+                "IpAddress": {
+                  "aws:VpcSourceIp": "10.199.0.0/24"
+                }
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Resource": "arn:aws:execute-api:*:*:*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountB"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceB"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/ServiceBAPI/Resource"
+      }
+    },
+    "ServiceBAPICloudWatchRoleC361BFB0": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountB"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceB"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/ServiceBAPI/CloudWatchRole/Resource"
+      }
+    },
+    "ServiceBAPIAccount8B73474F": {
+      "Type": "AWS::ApiGateway::Account",
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "ServiceBAPICloudWatchRoleC361BFB0",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "ServiceBAPIE44D7D31"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/ServiceBAPI/Account"
+      }
+    },
+    "ServiceBAPIDeployment29735B73e92fbac3e400e1abf84f44d12033039d": {
+      "Type": "AWS::ApiGateway::Deployment",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "ServiceBAPIE44D7D31"
+        },
+        "Description": "Automatically created by the RestApi construct"
+      },
+      "DependsOn": [
+        "ServiceBAPIAPICustomResponse6222BB1A",
+        "ServiceBAPIordersGETF0920508",
+        "ServiceBAPIordersCF9E93BB"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/ServiceBAPI/Deployment/Resource"
+      }
+    },
+    "ServiceBAPIDeploymentStageapi7F2D4453": {
+      "Type": "AWS::ApiGateway::Stage",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "ServiceBAPIE44D7D31"
+        },
+        "AccessLogSetting": {
+          "DestinationArn": {
+            "Fn::GetAtt": [
+              "APIAccessLogs06429C94",
+              "Arn"
+            ]
+          },
+          "Format": "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] \"$context.httpMethod $context.resourcePath $context.protocol\" $context.status $context.responseLength $context.requestId"
+        },
+        "DeploymentId": {
+          "Ref": "ServiceBAPIDeployment29735B73e92fbac3e400e1abf84f44d12033039d"
+        },
+        "StageName": "api",
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountB"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceB"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/ServiceBAPI/DeploymentStage.api/Resource"
+      }
+    },
+    "ServiceBAPIordersCF9E93BB": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "ServiceBAPIE44D7D31",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "orders",
+        "RestApiId": {
+          "Ref": "ServiceBAPIE44D7D31"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/ServiceBAPI/Default/orders/Resource"
+      }
+    },
+    "ServiceBAPIordersGETApiPermissionServiceBStackServiceBAPIE4D14DD6GETordersA57D3873": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "BackendLambdaD93C7B96",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "ServiceBAPIE44D7D31"
+              },
+              "/",
+              {
+                "Ref": "ServiceBAPIDeploymentStageapi7F2D4453"
+              },
+              "/GET/orders"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/ServiceBAPI/Default/orders/GET/ApiPermission.ServiceBStackServiceBAPIE4D14DD6.GET..orders"
+      }
+    },
+    "ServiceBAPIordersGETApiPermissionTestServiceBStackServiceBAPIE4D14DD6GETorders8C1D7B4C": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "BackendLambdaD93C7B96",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "ServiceBAPIE44D7D31"
+              },
+              "/test-invoke-stage/GET/orders"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/ServiceBAPI/Default/orders/GET/ApiPermission.Test.ServiceBStackServiceBAPIE4D14DD6.GET..orders"
+      }
+    },
+    "ServiceBAPIordersGETF0920508": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "GET",
+        "ResourceId": {
+          "Ref": "ServiceBAPIordersCF9E93BB"
+        },
+        "RestApiId": {
+          "Ref": "ServiceBAPIE44D7D31"
+        },
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "BackendLambdaD93C7B96",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/ServiceBAPI/Default/orders/GET/Resource"
+      }
+    },
+    "ServiceBAPIApiKey7D3CB3FC": {
+      "Type": "AWS::ApiGateway::ApiKey",
+      "Properties": {
+        "Enabled": true,
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "ServiceBAPIE44D7D31"
+            },
+            "StageName": {
+              "Ref": "ServiceBAPIDeploymentStageapi7F2D4453"
+            }
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountB"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceB"
+          }
+        ],
+        "Value": {
+          "Fn::Join": [
+            "",
+            [
+              "{{resolve:secretsmanager:",
+              {
+                "Ref": "APISecretDDFC1759"
+              },
+              ":SecretString:::}}"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/ServiceBAPI/ApiKey/Resource"
+      }
+    },
+    "ServiceBAPIUsagePlan3100CE00": {
+      "Type": "AWS::ApiGateway::UsagePlan",
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "ServiceBAPIE44D7D31"
+            },
+            "Stage": {
+              "Ref": "ServiceBAPIDeploymentStageapi7F2D4453"
+            },
+            "Throttle": {}
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountB"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceB"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/ServiceBAPI/UsagePlan/Resource"
+      }
+    },
+    "ServiceBAPIUsagePlanUsagePlanKeyResourceServiceBStackServiceBAPIApiKey135BE178BB785C7D": {
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+      "Properties": {
+        "KeyId": {
+          "Ref": "ServiceBAPIApiKey7D3CB3FC"
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "ServiceBAPIUsagePlan3100CE00"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/ServiceBAPI/UsagePlan/UsagePlanKeyResource:ServiceBStackServiceBAPIApiKey135BE178"
+      }
+    },
+    "ServiceBAPIAPICustomResponse6222BB1A": {
+      "Type": "AWS::ApiGateway::GatewayResponse",
+      "Properties": {
+        "ResponseType": "DEFAULT_4XX",
+        "RestApiId": {
+          "Ref": "ServiceBAPIE44D7D31"
+        },
+        "ResponseTemplates": {
+          "application/json": "{ 'message': $context.error.messageString, 'workshopmsg': 'hit-apigw'}"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/ServiceBAPI/APICustomResponse/Resource"
+      }
+    },
+    "UnknownAPID2B322C2": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "EndpointConfiguration": {
+          "Types": [
+            "PRIVATE"
+          ]
+        },
+        "Name": "UnknownAPI",
+        "Policy": {
+          "Statement": [
+            {
+              "Action": "execute-api:Invoke",
+              "Condition": {
+                "IpAddress": {
+                  "aws:VpcSourceIp": "10.199.0.0/24"
+                }
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Resource": "arn:aws:execute-api:*:*:*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountB"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceB"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/UnknownAPI/Resource"
+      }
+    },
+    "UnknownAPICloudWatchRoleF096B94B": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountB"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceB"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/UnknownAPI/CloudWatchRole/Resource"
+      }
+    },
+    "UnknownAPIAccount8D3ECFAB": {
+      "Type": "AWS::ApiGateway::Account",
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "UnknownAPICloudWatchRoleF096B94B",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "UnknownAPID2B322C2"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/UnknownAPI/Account"
+      }
+    },
+    "UnknownAPIDeploymentA635BB29ed6d4d2be8b239d028981d248820bffc": {
+      "Type": "AWS::ApiGateway::Deployment",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "UnknownAPID2B322C2"
+        },
+        "Description": "Automatically created by the RestApi construct"
+      },
+      "DependsOn": [
+        "UnknownAPIPUT4F8AF472"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/UnknownAPI/Deployment/Resource"
+      }
+    },
+    "UnknownAPIDeploymentStageapi6102BF0D": {
+      "Type": "AWS::ApiGateway::Stage",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "UnknownAPID2B322C2"
+        },
+        "DeploymentId": {
+          "Ref": "UnknownAPIDeploymentA635BB29ed6d4d2be8b239d028981d248820bffc"
+        },
+        "StageName": "api",
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountB"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceB"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/UnknownAPI/DeploymentStage.api/Resource"
+      }
+    },
+    "UnknownAPIPUT4F8AF472": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "PUT",
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "UnknownAPID2B322C2",
+            "RootResourceId"
+          ]
+        },
+        "RestApiId": {
+          "Ref": "UnknownAPID2B322C2"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseTemplates": {
+                "application/json": "{'message':'SUCCESS Mock PUT'}"
+              },
+              "StatusCode": "200"
+            }
+          ],
+          "RequestTemplates": {
+            "application/json": "{'statusCode': 200}"
+          },
+          "Type": "MOCK"
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/UnknownAPI/Default/PUT/Resource"
+      }
+    },
+    "APIIDParameterC20CF59D": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Type": "String",
+        "Value": {
+          "Ref": "ServiceBAPIE44D7D31"
+        },
+        "Name": "/workshop/params/service-b-api-id",
+        "Tags": {
+          "Owner": "AccountB",
+          "Project": "ZeroTrustWorkshop",
+          "Service": "ServiceB"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/APIIDParameter/Resource"
+      }
+    },
+    "APISecretNameParameter6B8748BE": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Type": "String",
+        "Value": {
+          "Ref": "APISecretDDFC1759"
+        },
+        "Name": "/workshop/params/service-b-api-secret-arn",
+        "Tags": {
+          "Owner": "AccountB",
+          "Project": "ZeroTrustWorkshop",
+          "Service": "ServiceB"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/APISecretNameParameter/Resource"
+      }
+    },
+    "UnknownAPIIDParameterA5054313": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Type": "String",
+        "Value": {
+          "Ref": "UnknownAPID2B322C2"
+        },
+        "Name": "/workshop/params/unknown-api-id",
+        "Tags": {
+          "Owner": "AccountB",
+          "Project": "ZeroTrustWorkshop",
+          "Service": "ServiceB"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/UnknownAPIIDParameter/Resource"
+      }
+    },
+    "APICallsDashboardAAA80A22": {
+      "Type": "AWS::CloudWatch::Dashboard",
+      "Properties": {
+        "DashboardBody": {
+          "Fn::Join": [
+            "",
+            [
+              "{\"start\":\"-PT2H\",\"widgets\":[{\"type\":\"metric\",\"width\":20,\"height\":6,\"x\":0,\"y\":0,\"properties\":{\"view\":\"timeSeries\",\"title\":\"Number of API Calls\",\"region\":\"",
+              {
+                "Ref": "AWS::Region"
+              },
+              "\",\"metrics\":[[\"AWS/ApiGateway\",\"Count\",\"ApiName\",\"ServiceBAPI\",{\"label\":\"Total API Calls\",\"stat\":\"SampleCount\"}],[\"AWS/ApiGateway\",\"4XXError\",\"ApiName\",\"ServiceBAPI\",{\"label\":\"Unauthorized Calls\",\"stat\":\"Sum\"}]],\"yAxis\":{\"left\":{\"min\":0}},\"period\":60}}]}"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/APICallsDashboard/Resource"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Analytics": "v2:deflate64:H4sIAAAAAAAAE21S207DMAz9lr1nGdMkpL2xi9gDIKoBH+CmXhfWxFUumqqo/06SdlChPeU4sY+PT7zky+WaP8ye4GrnorosgiCDPHw4EBe2O+kCDCh0aNiOtHXGC8eOaMkbgWznrSP1F570FL9713qXUCytpJOke5b6BLviWy8u6LZgkVWdBkVVycMnlE0uzaBnDaiyAh6evRapPD1NcYFGSWszsQTFw5GG+nwW1EjR5byMIh/VlodXqg+GfJtebrhnFoVBZxVoqNFEB3KccgYUpbeyBodX6CJHVhandZtWjoPf4EYI8tqxPbYNdQp1ZplE0dw6yxzAzbNsxl0z39CdqUpXI4qdXjCPNqIvG5mKBrIt94OUdhj0R+I2/mZu8v9qHCQaYlXaAyN1PVmCyUb0TDTkqys4ceZhD/ZcEpgs8zfo+54VXdSsFyu+5o+zbyvl3ER7pEJ+HM4fxjjFj4UCAAA="
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceBStack/CDKMetadata/Default"
+      },
+      "Condition": "CDKMetadataAvailable"
+    }
+  },
+  "Outputs": {
+    "ServiceBAPIEndpoint2651A72E": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "ServiceBAPIE44D7D31"
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region"
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix"
+            },
+            "/",
+            {
+              "Ref": "ServiceBAPIDeploymentStageapi7F2D4453"
+            },
+            "/"
+          ]
+        ]
+      }
+    },
+    "UnknownAPIEndpoint2B1A1A24": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "UnknownAPID2B322C2"
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region"
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix"
+            },
+            "/",
+            {
+              "Ref": "UnknownAPIDeploymentStageapi6102BF0D"
+            },
+            "/"
+          ]
+        ]
+      }
+    },
+    "APIMethodARN": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "arn:",
+            {
+              "Ref": "AWS::Partition"
+            },
+            ":execute-api:",
+            {
+              "Ref": "AWS::Region"
+            },
+            ":",
+            {
+              "Ref": "AWS::AccountId"
+            },
+            ":",
+            {
+              "Ref": "ServiceBAPIE44D7D31"
+            },
+            "/",
+            {
+              "Ref": "ServiceBAPIDeploymentStageapi7F2D4453"
+            },
+            "/GET/orders"
+          ]
+        ]
+      }
+    }
+  },
+  "Conditions": {
+    "CDKMetadataAvailable": {
+      "Fn::Or": [
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "af-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ca-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-northwest-1"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-3"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "me-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "sa-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-2"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-2"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

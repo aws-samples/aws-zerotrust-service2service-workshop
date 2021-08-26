@@ -1,0 +1,2946 @@
+{
+  "Parameters": {
+    "EEAssetsBucket": {
+      "Type": "String",
+      "Description": "Region-specific assets S3 bucket name."
+    },
+    "EEAssetsKeyPrefix": {
+      "Type": "String",
+      "Description": "S3 key prefix where this modules assets are stored. (e.g. modules/my_module/v1/)"
+    },
+    "SsmParameterValueworkshopparamsservicebapisecretarnC96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/workshop/params/service-b-api-secret-arn"
+    },
+    "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+      "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+    }
+  },
+  "Resources": {
+    "ServiceAInstanceRole919D8950": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "ec2.",
+                      {
+                        "Ref": "AWS::URLSuffix"
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Description": "Allows EC2 instances to call AWS services on your behalf.",
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore"
+              ]
+            ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonAPIGatewayInvokeFullAccess"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAInstanceRole/Resource"
+      }
+    },
+    "ServiceAInstanceRoleDefaultPolicyA4A6E2D5": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "SsmParameterValueworkshopparamsservicebapisecretarnC96584B6F00A464EAD1953AFF4B05118Parameter"
+              }
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "CallerOneE9C89DF9",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "CallerTwoDF240F92",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "CallerThreeE06DAEE6",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Action": [
+                "ssm:SendCommand",
+                "ssm:ListCommandInvocations"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "ServiceAInstanceRoleDefaultPolicyA4A6E2D5",
+        "Roles": [
+          {
+            "Ref": "ServiceAInstanceRole919D8950"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAInstanceRole/DefaultPolicy/Resource"
+      }
+    },
+    "ServiceALambdaRoleA5CC16AA": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Description": "Allows Lambda functions to call AWS services on your behalf.",
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceALambdaRole/Resource"
+      }
+    },
+    "ServiceALambdaRoleDefaultPolicy42CFEBA3": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "SsmParameterValueworkshopparamsservicebapisecretarnC96584B6F00A464EAD1953AFF4B05118Parameter"
+              }
+            },
+            {
+              "Action": "ssm:GetParameter*",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":ssm:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":parameter/workshop/params/*"
+                  ]
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "ServiceALambdaRoleDefaultPolicy42CFEBA3",
+        "Roles": [
+          {
+            "Ref": "ServiceALambdaRoleA5CC16AA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceALambdaRole/DefaultPolicy/Resource"
+      }
+    },
+    "ServiceAVPCE249ED38": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.199.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/ServiceAVPC"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/Resource"
+      }
+    },
+    "ServiceAVPCPrivateSubnet1Subnet86779CD2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.199.0.0/24",
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/ServiceAVPC/PrivateSubnet1"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PrivateSubnet1/Subnet"
+      }
+    },
+    "ServiceAVPCPrivateSubnet1RouteTable9D097A5C": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/ServiceAVPC/PrivateSubnet1"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PrivateSubnet1/RouteTable"
+      }
+    },
+    "ServiceAVPCPrivateSubnet1RouteTableAssociation79A5CE3D": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "ServiceAVPCPrivateSubnet1RouteTable9D097A5C"
+        },
+        "SubnetId": {
+          "Ref": "ServiceAVPCPrivateSubnet1Subnet86779CD2"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PrivateSubnet1/RouteTableAssociation"
+      }
+    },
+    "ServiceAVPCPrivateSubnet1DefaultRoute4F719C33": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "ServiceAVPCPrivateSubnet1RouteTable9D097A5C"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "ServiceAVPCPublicSubnet1NATGateway2B928AEE"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PrivateSubnet1/DefaultRoute"
+      }
+    },
+    "ServiceAVPCPrivateSubnet2Subnet86E1F16D": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.199.1.0/24",
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/ServiceAVPC/PrivateSubnet2"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PrivateSubnet2/Subnet"
+      }
+    },
+    "ServiceAVPCPrivateSubnet2RouteTable2B8268AF": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/ServiceAVPC/PrivateSubnet2"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PrivateSubnet2/RouteTable"
+      }
+    },
+    "ServiceAVPCPrivateSubnet2RouteTableAssociation5EFF9610": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "ServiceAVPCPrivateSubnet2RouteTable2B8268AF"
+        },
+        "SubnetId": {
+          "Ref": "ServiceAVPCPrivateSubnet2Subnet86E1F16D"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PrivateSubnet2/RouteTableAssociation"
+      }
+    },
+    "ServiceAVPCPrivateSubnet2DefaultRouteCF09EC6E": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "ServiceAVPCPrivateSubnet2RouteTable2B8268AF"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "ServiceAVPCPublicSubnet1NATGateway2B928AEE"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PrivateSubnet2/DefaultRoute"
+      }
+    },
+    "ServiceAVPCPublicSubnet1Subnet2A84C481": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.199.2.0/24",
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/ServiceAVPC/PublicSubnet1"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PublicSubnet1/Subnet"
+      }
+    },
+    "ServiceAVPCPublicSubnet1RouteTable1D7D7009": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/ServiceAVPC/PublicSubnet1"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PublicSubnet1/RouteTable"
+      }
+    },
+    "ServiceAVPCPublicSubnet1RouteTableAssociation167E7963": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "ServiceAVPCPublicSubnet1RouteTable1D7D7009"
+        },
+        "SubnetId": {
+          "Ref": "ServiceAVPCPublicSubnet1Subnet2A84C481"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PublicSubnet1/RouteTableAssociation"
+      }
+    },
+    "ServiceAVPCPublicSubnet1DefaultRoute6488E472": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "ServiceAVPCPublicSubnet1RouteTable1D7D7009"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "ServiceAVPCIGW8DA0A08B"
+        }
+      },
+      "DependsOn": [
+        "ServiceAVPCVPCGWA7CF038F"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PublicSubnet1/DefaultRoute"
+      }
+    },
+    "ServiceAVPCPublicSubnet1EIP11A7229E": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/ServiceAVPC/PublicSubnet1"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PublicSubnet1/EIP"
+      }
+    },
+    "ServiceAVPCPublicSubnet1NATGateway2B928AEE": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "ServiceAVPCPublicSubnet1Subnet2A84C481"
+        },
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "ServiceAVPCPublicSubnet1EIP11A7229E",
+            "AllocationId"
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/ServiceAVPC/PublicSubnet1"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PublicSubnet1/NATGateway"
+      }
+    },
+    "ServiceAVPCPublicSubnet2Subnet7C59D581": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.199.3.0/24",
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/ServiceAVPC/PublicSubnet2"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PublicSubnet2/Subnet"
+      }
+    },
+    "ServiceAVPCPublicSubnet2RouteTable6BDDDE93": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/ServiceAVPC/PublicSubnet2"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PublicSubnet2/RouteTable"
+      }
+    },
+    "ServiceAVPCPublicSubnet2RouteTableAssociationFD1BD8B1": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "ServiceAVPCPublicSubnet2RouteTable6BDDDE93"
+        },
+        "SubnetId": {
+          "Ref": "ServiceAVPCPublicSubnet2Subnet7C59D581"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PublicSubnet2/RouteTableAssociation"
+      }
+    },
+    "ServiceAVPCPublicSubnet2DefaultRouteFF84431A": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "ServiceAVPCPublicSubnet2RouteTable6BDDDE93"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "ServiceAVPCIGW8DA0A08B"
+        }
+      },
+      "DependsOn": [
+        "ServiceAVPCVPCGWA7CF038F"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/PublicSubnet2/DefaultRoute"
+      }
+    },
+    "ServiceAVPCIGW8DA0A08B": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/ServiceAVPC"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/IGW"
+      }
+    },
+    "ServiceAVPCVPCGWA7CF038F": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        },
+        "InternetGatewayId": {
+          "Ref": "ServiceAVPCIGW8DA0A08B"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/VPCGW"
+      }
+    },
+    "ServiceAVPCAPIGWVPCEndpoint2EDA772E": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".execute-api"
+            ]
+          ]
+        },
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        },
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "APIGWVPCEndpointSecurityGroup512E5E3C",
+              "GroupId"
+            ]
+          }
+        ],
+        "SubnetIds": [
+          {
+            "Ref": "ServiceAVPCPrivateSubnet1Subnet86779CD2"
+          },
+          {
+            "Ref": "ServiceAVPCPrivateSubnet2Subnet86E1F16D"
+          }
+        ],
+        "VpcEndpointType": "Interface"
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/APIGWVPCEndpoint/Resource"
+      }
+    },
+    "ServiceAVPCSSMVPCEndpointSecurityGroupAA79E59D": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "ServiceAStack/ServiceAVPC/SSMVPCEndpoint/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "ServiceAVPCE249ED38",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "ServiceAVPCE249ED38",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ],
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/SSMVPCEndpoint/SecurityGroup/Resource"
+      }
+    },
+    "ServiceAVPCSSMVPCEndpointFFB834BA": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ssm"
+            ]
+          ]
+        },
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        },
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "ServiceAVPCSSMVPCEndpointSecurityGroupAA79E59D",
+              "GroupId"
+            ]
+          }
+        ],
+        "SubnetIds": [
+          {
+            "Ref": "ServiceAVPCPrivateSubnet1Subnet86779CD2"
+          },
+          {
+            "Ref": "ServiceAVPCPrivateSubnet2Subnet86E1F16D"
+          }
+        ],
+        "VpcEndpointType": "Interface"
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/SSMVPCEndpoint/Resource"
+      }
+    },
+    "ServiceAVPCSSMMSGVPCEndpointSecurityGroupE36CA564": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "ServiceAStack/ServiceAVPC/SSMMSGVPCEndpoint/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "ServiceAVPCE249ED38",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "ServiceAVPCE249ED38",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ],
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/SSMMSGVPCEndpoint/SecurityGroup/Resource"
+      }
+    },
+    "ServiceAVPCSSMMSGVPCEndpointEECBB610": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ssmmessages"
+            ]
+          ]
+        },
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        },
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "ServiceAVPCSSMMSGVPCEndpointSecurityGroupE36CA564",
+              "GroupId"
+            ]
+          }
+        ],
+        "SubnetIds": [
+          {
+            "Ref": "ServiceAVPCPrivateSubnet1Subnet86779CD2"
+          },
+          {
+            "Ref": "ServiceAVPCPrivateSubnet2Subnet86E1F16D"
+          }
+        ],
+        "VpcEndpointType": "Interface"
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAVPC/SSMMSGVPCEndpoint/Resource"
+      }
+    },
+    "OtherVPC4F26C84D": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.199.0.0/24",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/OtherVPC"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/Resource"
+      }
+    },
+    "OtherVPCPrivateSubnet1SubnetD46635C4": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.199.0.0/26",
+        "VpcId": {
+          "Ref": "OtherVPC4F26C84D"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/OtherVPC/PrivateSubnet1"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/PrivateSubnet1/Subnet"
+      }
+    },
+    "OtherVPCPrivateSubnet1RouteTable4E6301AA": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "OtherVPC4F26C84D"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/OtherVPC/PrivateSubnet1"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/PrivateSubnet1/RouteTable"
+      }
+    },
+    "OtherVPCPrivateSubnet1RouteTableAssociation6A7E4D33": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "OtherVPCPrivateSubnet1RouteTable4E6301AA"
+        },
+        "SubnetId": {
+          "Ref": "OtherVPCPrivateSubnet1SubnetD46635C4"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/PrivateSubnet1/RouteTableAssociation"
+      }
+    },
+    "OtherVPCPrivateSubnet1DefaultRoute73035179": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "OtherVPCPrivateSubnet1RouteTable4E6301AA"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "OtherVPCPublicSubnet1NATGateway982870F4"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/PrivateSubnet1/DefaultRoute"
+      }
+    },
+    "OtherVPCPublicSubnet1Subnet7C6060EB": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.199.0.64/26",
+        "VpcId": {
+          "Ref": "OtherVPC4F26C84D"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/OtherVPC/PublicSubnet1"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/PublicSubnet1/Subnet"
+      }
+    },
+    "OtherVPCPublicSubnet1RouteTable065F9C73": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "OtherVPC4F26C84D"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/OtherVPC/PublicSubnet1"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/PublicSubnet1/RouteTable"
+      }
+    },
+    "OtherVPCPublicSubnet1RouteTableAssociation50BFFA65": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "OtherVPCPublicSubnet1RouteTable065F9C73"
+        },
+        "SubnetId": {
+          "Ref": "OtherVPCPublicSubnet1Subnet7C6060EB"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/PublicSubnet1/RouteTableAssociation"
+      }
+    },
+    "OtherVPCPublicSubnet1DefaultRouteE4767CAE": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "OtherVPCPublicSubnet1RouteTable065F9C73"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "OtherVPCIGWD56B3F3B"
+        }
+      },
+      "DependsOn": [
+        "OtherVPCVPCGW40BC5735"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/PublicSubnet1/DefaultRoute"
+      }
+    },
+    "OtherVPCPublicSubnet1EIPC039E78F": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/OtherVPC/PublicSubnet1"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/PublicSubnet1/EIP"
+      }
+    },
+    "OtherVPCPublicSubnet1NATGateway982870F4": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "OtherVPCPublicSubnet1Subnet7C6060EB"
+        },
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "OtherVPCPublicSubnet1EIPC039E78F",
+            "AllocationId"
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/OtherVPC/PublicSubnet1"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/PublicSubnet1/NATGateway"
+      }
+    },
+    "OtherVPCIGWD56B3F3B": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/OtherVPC"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/IGW"
+      }
+    },
+    "OtherVPCVPCGW40BC5735": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "OtherVPC4F26C84D"
+        },
+        "InternetGatewayId": {
+          "Ref": "OtherVPCIGWD56B3F3B"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/VPCGW"
+      }
+    },
+    "OtherVPCAPIGWVPC2EndpointSecurityGroup73C5FCBF": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "ServiceAStack/OtherVPC/APIGWVPC2Endpoint/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "OtherVPC4F26C84D",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "OtherVPC4F26C84D",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ],
+        "VpcId": {
+          "Ref": "OtherVPC4F26C84D"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/APIGWVPC2Endpoint/SecurityGroup/Resource"
+      }
+    },
+    "OtherVPCAPIGWVPC2EndpointB5879E6B": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".execute-api"
+            ]
+          ]
+        },
+        "VpcId": {
+          "Ref": "OtherVPC4F26C84D"
+        },
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "OtherVPCAPIGWVPC2EndpointSecurityGroup73C5FCBF",
+              "GroupId"
+            ]
+          }
+        ],
+        "SubnetIds": [
+          {
+            "Ref": "OtherVPCPrivateSubnet1SubnetD46635C4"
+          }
+        ],
+        "VpcEndpointType": "Interface"
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/APIGWVPC2Endpoint/Resource"
+      }
+    },
+    "OtherVPCSSMVPC2EndpointSecurityGroup769F1881": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "ServiceAStack/OtherVPC/SSMVPC2Endpoint/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "OtherVPC4F26C84D",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "OtherVPC4F26C84D",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ],
+        "VpcId": {
+          "Ref": "OtherVPC4F26C84D"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/SSMVPC2Endpoint/SecurityGroup/Resource"
+      }
+    },
+    "OtherVPCSSMVPC2Endpoint15D9FFBC": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ssm"
+            ]
+          ]
+        },
+        "VpcId": {
+          "Ref": "OtherVPC4F26C84D"
+        },
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "OtherVPCSSMVPC2EndpointSecurityGroup769F1881",
+              "GroupId"
+            ]
+          }
+        ],
+        "SubnetIds": [
+          {
+            "Ref": "OtherVPCPrivateSubnet1SubnetD46635C4"
+          }
+        ],
+        "VpcEndpointType": "Interface"
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/SSMVPC2Endpoint/Resource"
+      }
+    },
+    "OtherVPCSSMMSGVPC2EndpointSecurityGroupE4C6B3AF": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "ServiceAStack/OtherVPC/SSMMSGVPC2Endpoint/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "OtherVPC4F26C84D",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "OtherVPC4F26C84D",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ],
+        "VpcId": {
+          "Ref": "OtherVPC4F26C84D"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/SSMMSGVPC2Endpoint/SecurityGroup/Resource"
+      }
+    },
+    "OtherVPCSSMMSGVPC2Endpoint53F44D6B": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ssmmessages"
+            ]
+          ]
+        },
+        "VpcId": {
+          "Ref": "OtherVPC4F26C84D"
+        },
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "OtherVPCSSMMSGVPC2EndpointSecurityGroupE4C6B3AF",
+              "GroupId"
+            ]
+          }
+        ],
+        "SubnetIds": [
+          {
+            "Ref": "OtherVPCPrivateSubnet1SubnetD46635C4"
+          }
+        ],
+        "VpcEndpointType": "Interface"
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherVPC/SSMMSGVPC2Endpoint/Resource"
+      }
+    },
+    "MainVPCSecurityGroupA08D57AE": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "ServiceAStack/MainVPCSecurityGroup",
+        "GroupName": "MainVPCSecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ],
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/MainVPCSecurityGroup/Resource"
+      }
+    },
+    "ServiceASecurityGroupF9B81400": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "ServiceAStack/ServiceASecurityGroup",
+        "GroupName": "ServiceASecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ],
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceASecurityGroup/Resource"
+      }
+    },
+    "APIGWVPCEndpointSecurityGroup512E5E3C": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "ServiceAStack/APIGWVPCEndpointSecurityGroup",
+        "GroupName": "APIGWVPCEndpointSecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "ServiceAVPCE249ED38",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "ServiceAVPCE249ED38",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "APIGWVPCEndpointSecurityGroup"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ],
+        "VpcId": {
+          "Ref": "ServiceAVPCE249ED38"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/APIGWVPCEndpointSecurityGroup/Resource"
+      }
+    },
+    "WorkshopLayer518F319D": {
+      "Type": "AWS::Lambda::LayerVersion",
+      "Properties": {
+        "Content": {
+          "S3Bucket": {
+            "Ref": "EEAssetsBucket"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Ref": "EEAssetsKeyPrefix"
+                },
+                "lambda/layer/lambda-code.zip"
+              ]
+            ]
+          }
+        },
+        "CompatibleRuntimes": [
+          "python3.8"
+        ],
+        "Description": "The layer containing external packages used in this workshop."
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/WorkshopLayer/Resource"
+      }
+    },
+    "CallerOneE9C89DF9": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "EEAssetsBucket"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Ref": "EEAssetsKeyPrefix"
+                },
+                "lambda/caller_nosigv4/lambda-code.zip"
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "ServiceALambdaRoleA5CC16AA",
+            "Arn"
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "api_resource": "orders",
+            "api_region": {
+              "Ref": "AWS::Region"
+            },
+            "api_id_parameter": "/workshop/params/service-b-api-id",
+            "api_secret_parameter": "/workshop/params/service-b-api-secret-arn"
+          }
+        },
+        "Handler": "lambda_function.lambda_handler",
+        "Layers": [
+          {
+            "Ref": "WorkshopLayer518F319D"
+          }
+        ],
+        "Runtime": "python3.8",
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ],
+        "Timeout": 60,
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "MainVPCSecurityGroupA08D57AE",
+                "GroupId"
+              ]
+            }
+          ],
+          "SubnetIds": [
+            {
+              "Ref": "ServiceAVPCPrivateSubnet2Subnet86E1F16D"
+            }
+          ]
+        }
+      },
+      "DependsOn": [
+        "ServiceALambdaRoleDefaultPolicy42CFEBA3",
+        "ServiceALambdaRoleA5CC16AA"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/CallerOne/Resource"
+      }
+    },
+    "CallerTwoDF240F92": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "EEAssetsBucket"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Ref": "EEAssetsKeyPrefix"
+                },
+                "lambda/caller_nosigv4/lambda-code.zip"
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "ServiceALambdaRoleA5CC16AA",
+            "Arn"
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "api_resource": "orders",
+            "api_region": {
+              "Ref": "AWS::Region"
+            },
+            "api_id_parameter": "/workshop/params/service-b-api-id",
+            "api_secret_parameter": "/workshop/params/service-b-api-secret-arn"
+          }
+        },
+        "Handler": "lambda_function.lambda_handler",
+        "Layers": [
+          {
+            "Ref": "WorkshopLayer518F319D"
+          }
+        ],
+        "Runtime": "python3.8",
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ],
+        "Timeout": 60,
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "MainVPCSecurityGroupA08D57AE",
+                "GroupId"
+              ]
+            }
+          ],
+          "SubnetIds": [
+            {
+              "Ref": "ServiceAVPCPrivateSubnet1Subnet86779CD2"
+            }
+          ]
+        }
+      },
+      "DependsOn": [
+        "ServiceALambdaRoleDefaultPolicy42CFEBA3",
+        "ServiceALambdaRoleA5CC16AA"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/CallerTwo/Resource"
+      }
+    },
+    "CallerThreeE06DAEE6": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "EEAssetsBucket"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Ref": "EEAssetsKeyPrefix"
+                },
+                "lambda/caller_sigv4/lambda-code.zip"
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "ServiceALambdaRoleA5CC16AA",
+            "Arn"
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "api_resource": "orders",
+            "api_region": {
+              "Ref": "AWS::Region"
+            },
+            "api_id_parameter": "/workshop/params/service-b-api-id",
+            "api_secret_parameter": "/workshop/params/service-b-api-secret-arn"
+          }
+        },
+        "Handler": "lambda_function.lambda_handler",
+        "Layers": [
+          {
+            "Ref": "WorkshopLayer518F319D"
+          }
+        ],
+        "Runtime": "python3.8",
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ],
+        "Timeout": 60,
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "MainVPCSecurityGroupA08D57AE",
+                "GroupId"
+              ]
+            }
+          ],
+          "SubnetIds": [
+            {
+              "Ref": "ServiceAVPCPrivateSubnet1Subnet86779CD2"
+            }
+          ]
+        }
+      },
+      "DependsOn": [
+        "ServiceALambdaRoleDefaultPolicy42CFEBA3",
+        "ServiceALambdaRoleA5CC16AA"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/CallerThree/Resource"
+      }
+    },
+    "GuardDutyHelperServiceRoleDA0369C0": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/GuardDutyHelper/ServiceRole/Resource"
+      }
+    },
+    "GuardDutyHelperServiceRoleDefaultPolicyACC9622B": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "guardduty:CreateDetector",
+                "guardduty:CreateSampleFindings",
+                "guardduty:ListDetectors"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "GuardDutyHelperServiceRoleDefaultPolicyACC9622B",
+        "Roles": [
+          {
+            "Ref": "GuardDutyHelperServiceRoleDA0369C0"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/GuardDutyHelper/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "GuardDutyHelper7B2CAB0B": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "EEAssetsBucket"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Ref": "EEAssetsKeyPrefix"
+                },
+                "lambda/guardduty_helper/lambda-code.zip"
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "GuardDutyHelperServiceRoleDA0369C0",
+            "Arn"
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "region": {
+              "Ref": "AWS::Region"
+            }
+          }
+        },
+        "Handler": "lambda_function.lambda_handler",
+        "Runtime": "python3.8",
+        "Tags": [
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ],
+        "Timeout": 60
+      },
+      "DependsOn": [
+        "GuardDutyHelperServiceRoleDefaultPolicyACC9622B",
+        "GuardDutyHelperServiceRoleDA0369C0"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/GuardDutyHelper/Resource"
+      }
+    },
+    "GDInit": {
+      "Type": "AWS::CloudFormation::CustomResource",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "GuardDutyHelper7B2CAB0B",
+            "Arn"
+          ]
+        }
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/GDInit/Default"
+      }
+    },
+    "LogGroup0B487484F": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "CallerOneE9C89DF9"
+              }
+            ]
+          ]
+        },
+        "RetentionInDays": 731
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/LogGroup0/Resource"
+      }
+    },
+    "LogGroup106AAD846": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "CallerTwoDF240F92"
+              }
+            ]
+          ]
+        },
+        "RetentionInDays": 731
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/LogGroup1/Resource"
+      }
+    },
+    "LogGroup2477F707C": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "CallerThreeE06DAEE6"
+              }
+            ]
+          ]
+        },
+        "RetentionInDays": 731
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/LogGroup2/Resource"
+      }
+    },
+    "LogGroup34356AF39": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "GuardDutyHelper7B2CAB0B"
+              }
+            ]
+          ]
+        },
+        "RetentionInDays": 731
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/LogGroup3/Resource"
+      }
+    },
+    "ScheduleRuleOne938E8D32": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "Description": "Scheduler running every minute",
+        "ScheduleExpression": "rate(1 minute)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "CallerOneE9C89DF9",
+                "Arn"
+              ]
+            },
+            "Id": "Target0"
+          },
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "CallerTwoDF240F92",
+                "Arn"
+              ]
+            },
+            "Id": "Target1"
+          },
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "CallerThreeE06DAEE6",
+                "Arn"
+              ]
+            },
+            "Id": "Target2"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ScheduleRuleOne/Resource"
+      }
+    },
+    "ScheduleRuleOneAllowEventRuleServiceAStackCallerOneAA641A7DDF8D8A4E": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "CallerOneE9C89DF9",
+            "Arn"
+          ]
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "ScheduleRuleOne938E8D32",
+            "Arn"
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ScheduleRuleOne/AllowEventRuleServiceAStackCallerOneAA641A7D"
+      }
+    },
+    "ScheduleRuleOneAllowEventRuleServiceAStackCallerTwoC32695FAB03BE227": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "CallerTwoDF240F92",
+            "Arn"
+          ]
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "ScheduleRuleOne938E8D32",
+            "Arn"
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ScheduleRuleOne/AllowEventRuleServiceAStackCallerTwoC32695FA"
+      }
+    },
+    "ScheduleRuleOneAllowEventRuleServiceAStackCallerThreeE51BB7A51B959AFE": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "CallerThreeE06DAEE6",
+            "Arn"
+          ]
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "ScheduleRuleOne938E8D32",
+            "Arn"
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ScheduleRuleOne/AllowEventRuleServiceAStackCallerThreeE51BB7A5"
+      }
+    },
+    "ServiceAInstanceInstanceProfileE6B75074": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "ServiceAInstanceRole919D8950"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAInstance/InstanceProfile"
+      }
+    },
+    "ServiceAInstance15E8E518": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "IamInstanceProfile": {
+          "Ref": "ServiceAInstanceInstanceProfileE6B75074"
+        },
+        "ImageId": {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter"
+        },
+        "InstanceType": "t3.micro",
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "ServiceASecurityGroupF9B81400",
+              "GroupId"
+            ]
+          }
+        ],
+        "SubnetId": {
+          "Ref": "ServiceAVPCPrivateSubnet1Subnet86779CD2"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/ServiceAInstance"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\npip3 install aws-requests-auth boto3 python-dotenv\ncd /tmp\n# NOTE update with latest Event Engine S3 URL\ncurl -O https://ee-assets-prod-us-east-1.s3.amazonaws.com/modules/1a656bee298f48fcad1bd4938e19b40a/v1/curl-pkg.zip\nunzip -qo curl-pkg.zip -d /tmp/workshop/\nchmod -R 777 /tmp/workshop/\n\ntouch /tmp/workshop/.env\n\necho python3 /tmp/workshop/scanner.py > /usr/bin/runscanner\nchmod 755 /usr/bin/runscanner\n\necho \"* * * * * python3 /tmp/workshop/scanner.py > /dev/null 2>&1\" >> /tmp/workshop/cron.txt\necho \"* * * * * python3 /tmp/workshop/scanner.py > /dev/null 2>&1\" >> /tmp/workshop/cron.txt\necho \"* * * * * python3 /tmp/workshop/scanner.py > /dev/null 2>&1\" >> /tmp/workshop/cron.txt\necho \"* * * * * python3 /tmp/workshop/scanner.py > /dev/null 2>&1\" >> /tmp/workshop/cron.txt\ncrontab /tmp/workshop/cron.txt\n\necho api_resource=orders >> /tmp/workshop/.env\necho api_region=",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " >> /tmp/workshop/.env\necho api_id_parameter=/workshop/params/service-b-api-id >> /tmp/workshop/.env\necho api_secret_parameter=/workshop/params/service-b-api-secret-arn >> /tmp/workshop/.env\necho unwanted_callers_parameter=/workshop/params/service-a-unwanted-callers-list >> /tmp/workshop/.env\necho unknown_api_id_parameter=/workshop/params/unknown-api-id >> /tmp/workshop/.env"
+              ]
+            ]
+          }
+        }
+      },
+      "DependsOn": [
+        "ServiceAInstanceRoleDefaultPolicyA4A6E2D5",
+        "ServiceAInstanceRole919D8950"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/ServiceAInstance/Resource"
+      }
+    },
+    "OtherInstanceInstanceSecurityGroup7D24BF50": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "ServiceAStack/OtherInstance/InstanceSecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/OtherInstance"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ],
+        "VpcId": {
+          "Ref": "OtherVPC4F26C84D"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherInstance/InstanceSecurityGroup/Resource"
+      }
+    },
+    "OtherInstanceInstanceProfile327ED654": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "ServiceAInstanceRole919D8950"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherInstance/InstanceProfile"
+      }
+    },
+    "OtherInstanceB97E7A26": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "IamInstanceProfile": {
+          "Ref": "OtherInstanceInstanceProfile327ED654"
+        },
+        "ImageId": {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter"
+        },
+        "InstanceType": "t3.micro",
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "OtherInstanceInstanceSecurityGroup7D24BF50",
+              "GroupId"
+            ]
+          }
+        ],
+        "SubnetId": {
+          "Ref": "OtherVPCPrivateSubnet1SubnetD46635C4"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ServiceAStack/OtherInstance"
+          },
+          {
+            "Key": "Owner",
+            "Value": "AccountA"
+          },
+          {
+            "Key": "Project",
+            "Value": "ZeroTrustWorkshop"
+          },
+          {
+            "Key": "Service",
+            "Value": "ServiceA"
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\npip3 install aws-requests-auth boto3 python-dotenv\ncd /tmp\n# NOTE update with latest Event Engine S3 URL\ncurl -O https://ee-assets-prod-us-east-1.s3.amazonaws.com/modules/1a656bee298f48fcad1bd4938e19b40a/v1/curl-pkg.zip\nunzip -qo curl-pkg.zip -d /tmp/workshop/\nchmod -R 777 /tmp/workshop/\n\ntouch /tmp/workshop/.env\n\necho python3 /tmp/workshop/scanner.py > /usr/bin/runscanner\nchmod 755 /usr/bin/runscanner\n\necho \"* * * * * python3 /tmp/workshop/scanner.py > /dev/null 2>&1\" >> /tmp/workshop/cron.txt\necho \"* * * * * python3 /tmp/workshop/scanner.py > /dev/null 2>&1\" >> /tmp/workshop/cron.txt\necho \"* * * * * python3 /tmp/workshop/scanner.py > /dev/null 2>&1\" >> /tmp/workshop/cron.txt\necho \"* * * * * python3 /tmp/workshop/scanner.py > /dev/null 2>&1\" >> /tmp/workshop/cron.txt\ncrontab /tmp/workshop/cron.txt\n\necho api_resource=orders >> /tmp/workshop/.env\necho api_region=",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " >> /tmp/workshop/.env\necho api_id_parameter=/workshop/params/service-b-api-id >> /tmp/workshop/.env\necho api_secret_parameter=/workshop/params/service-b-api-secret-arn >> /tmp/workshop/.env"
+              ]
+            ]
+          }
+        }
+      },
+      "DependsOn": [
+        "ServiceAInstanceRoleDefaultPolicyA4A6E2D5",
+        "ServiceAInstanceRole919D8950"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/OtherInstance/Resource"
+      }
+    },
+    "UnwantedCallersListParameter51EAAB6E": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Type": "StringList",
+        "Value": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Fn::GetAtt": [
+                  "CallerOneE9C89DF9",
+                  "Arn"
+                ]
+              },
+              ",",
+              {
+                "Fn::GetAtt": [
+                  "CallerTwoDF240F92",
+                  "Arn"
+                ]
+              },
+              ",",
+              {
+                "Fn::GetAtt": [
+                  "CallerThreeE06DAEE6",
+                  "Arn"
+                ]
+              },
+              ",",
+              {
+                "Ref": "OtherInstanceB97E7A26"
+              }
+            ]
+          ]
+        },
+        "Name": "/workshop/params/service-a-unwanted-callers-list",
+        "Tags": {
+          "Owner": "AccountA",
+          "Project": "ZeroTrustWorkshop",
+          "Service": "ServiceA"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/UnwantedCallersListParameter/Resource"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Analytics": "v2:deflate64:H4sIAAAAAAAAE1VS227CMAz9Ft5DGEOaxNugYggJbVGZeE9TFzKapEocUFX135deaMuTjy/xsU+8pMvlmr7NPvnDzUV6W1TCWKDVCbm4kSjTjFuuAMGSyGiH1gskMTjjrQASeYdGjW6mp/jHY+GxQeFpKlEaXZOGp3IruvXiBrjlDojkilaxybsGjWUml6Js6Qd0COxcC2DWZDKHmoB4p9W5EE3yzCLCrLxzhJNPNLSsI4qNR/jlSUfRxcfYxjkjJG/mG4oJ80lgHlvsDqwx3xz3geTB+5mCMKFgEgqT9N4Gg4ZXBRpJW5dxAWHcnU4LIzX2xYN7AuGtxHJvjS/aMV8Cz/WnUtQk5ypJOa2OvAR7Buv6HV78L6/Fc7kpZmCVdK79ltxcXGhjLgP9Eweh72GHkI19/0W+kd851ZyJlfpylA4ndzI5mrquCSvxavRiRdf0Y/bnpJxbr1EqoHFn/wGLE6ZKhAIAAA=="
+      },
+      "Metadata": {
+        "aws:cdk:path": "ServiceAStack/CDKMetadata/Default"
+      },
+      "Condition": "CDKMetadataAvailable"
+    }
+  },
+  "Outputs": {
+    "InstanceSession": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://console.aws.amazon.com/systems-manager/session-manager/",
+            {
+              "Ref": "ServiceAInstance15E8E518"
+            },
+            "?",
+            {
+              "Ref": "AWS::Region"
+            }
+          ]
+        ]
+      }
+    },
+    "InstanceRoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "ServiceAInstanceRole919D8950",
+          "Arn"
+        ]
+      }
+    },
+    "ServiceAAccountID": {
+      "Value": {
+        "Ref": "AWS::AccountId"
+      }
+    },
+    "VPCEndpointID": {
+      "Value": {
+        "Ref": "ServiceAVPCAPIGWVPCEndpoint2EDA772E"
+      }
+    }
+  },
+  "Conditions": {
+    "CDKMetadataAvailable": {
+      "Fn::Or": [
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "af-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ca-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-northwest-1"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-3"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "me-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "sa-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-2"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-2"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
