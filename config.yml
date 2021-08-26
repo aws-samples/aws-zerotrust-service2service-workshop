@@ -31,3 +31,10 @@ api_resource_policy:
 
 # Systems Manager parameters
 params_path: "/workshop/params/"
+
+# dev mode flag: set this to true only for development time; to update and/or deploy the stacks 
+# via `cdk deploy` rather than CloudFormation. Setting this to true, CDK will use `.from_asset` 
+# for lambdas source code, located locally under "./src/lambda/", which will need a `cdk bootstrap` first.
+# Set to false for final synth so can have portable deployable CloudFormation templates; in this case CDK 
+# will use `.from_bucket` for lambdas - getting the code from an existing bucket (AWS Event Engine bucket by default).
+dev_mode: false
