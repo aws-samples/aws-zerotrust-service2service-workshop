@@ -1,11 +1,8 @@
 # Zero Trust Workshop - Service2Service Episode - Code
-
-
-| :zap:       Work In Progress ...   |
-|------------------------------------|
+This repository contains the source code, AWS environment build, of the [Zero Trust Service2Service Workshop](https://zerotrust-service2service.workshop.aws/) workshop. It does not contain the source code of the workshop's website.
 
 <!-- TODO: describe what this creates  -->
-This code has two main CDK stacks:
+There are two main CDK stacks in this code:
 - ServiceA
 - ServiceB
 
