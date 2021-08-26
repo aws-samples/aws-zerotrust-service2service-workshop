@@ -70,13 +70,13 @@ This project is initialized by `cdk init` and has the standard structure of a Py
 <!-- TODO: complete -->
 ```markdown
 .
+├── cfn_templates                           <-- Directory for synthesized CFN templates
+├── src                                     <-- Directory for Lambda and EC2 source codes
+├── zerotrust_service2service_workshop      <-- Directory for main CDK stacks
 ├── app.py                                  <-- The entry point for this application.
 ├── config.yml                              <-- [Not a CDK thing] Static variables used in this app.
 ├── README.md                               <-- This instructions file
-├── setup.py                                <-- 
-├── src                                     <-- Directory for Lambda and EC2 source codes
-└── zerotrust_service2service_workshop      <-- Directory for main CDK stacks
-
+├── setup.py                                <-- Defines package's construction and dependencies.
 ```
 
 ## Security
