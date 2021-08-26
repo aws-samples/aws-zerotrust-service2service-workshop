@@ -3,7 +3,6 @@
 
 #!/usr/bin/env python3
 
-import os
 import yaml
 
 from aws_cdk import core as cdk
@@ -34,7 +33,7 @@ service_a_stack = ServiceAStack(app,"ServiceAStack",
     )
 
 # NOTE comment this for final synth, uncomment while developing
-#service_a_stack.add_dependency(service_b_stack)
+service_a_stack.add_dependency(service_b_stack)
 
 with open("./config.yml","r") as f:
     configs = yaml.safe_load(f)
