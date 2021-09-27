@@ -2169,6 +2169,16 @@
               ],
               "Effect": "Allow",
               "Resource": "*"
+            },
+            {
+              "Action": "iam:CreateServiceLinkedRole",
+              "Condition": {
+                "StringLike": {
+                  "iam:AWSServiceName": "guardduty.amazonaws.com"
+                }
+              },
+              "Effect": "Allow",
+              "Resource": "arn:aws:iam::*:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty*"
             }
           ],
           "Version": "2012-10-17"
@@ -2704,7 +2714,7 @@
     "CDKMetadata": {
       "Type": "AWS::CDK::Metadata",
       "Properties": {
-        "Analytics": "v2:deflate64:H4sIAAAAAAAAE1VS227CMAz9Ft5DGEOaxNugYggJbVGZeE9TFzKapEocUFX135deaMuTjy/xsU+8pMvlmr7NPvnDzUV6W1TCWKDVCbm4kSjTjFuuAMGSyGiH1gskMTjjrQASeYdGjW6mp/jHY+GxQeFpKlEaXZOGp3IruvXiBrjlDojkilaxybsGjWUml6Js6Qd0COxcC2DWZDKHmoB4p9W5EE3yzCLCrLxzhJNPNLSsI4qNR/jlSUfRxcfYxjkjJG/mG4oJ80lgHlvsDqwx3xz3geTB+5mCMKFgEgqT9N4Gg4ZXBRpJW5dxAWHcnU4LIzX2xYN7AuGtxHJvjS/aMV8Cz/WnUtQk5ypJOa2OvAR7Buv6HV78L6/Fc7kpZmCVdK79ltxcXGhjLgP9Eweh72GHkI19/0W+kd851ZyJlfpylA4ndzI5mrquCSvxavRiRdf0Y/bnpJxbr1EqoHFn/wGLE6ZKhAIAAA=="
+        "Analytics": "v2:deflate64:H4sIAAAAAAAAE1VSTW/CMAz9LdxDGOMwcRtUDCGhLSoT9zR1IaNJqsQBVVX/+9IP2nLy80f87Bcv6XK5pm+zT/5wc5HeFpUwFmh1Qi5uJMo045YrQLAkMtqh9QJJDM54K4BE3qFRo5vpKf7xWHhsUHiaSpRG16ThqdyKbr24AW65AyK5olVs8q5BY5nJpShb+gEdAjvXApg1mcyhJiDeaXUuRJM8s4gwK+8c4eQTDS3riGLjEX550lF08TG2cc4IyZv5hmLCfBKYxxa7A2vMN8d9IHnwfqYgTCiYhMIkvbfBoOFVgUbS1mVcQBh3p9PCSI198eCeQHgrsdxb44t2zJfAc/2pFDXJuUpSTqsjL8Gewbp+hxf/y2vxXG6KGVglnWu/JTcXF9qYy0D/xEHoe9ghZGPff5Fv5HdONWdipb4cpcPJnUyOpq5rwkq8Gr1Y0TX9mP05KefWa5QKaNzZf0t3jl2EAgAA"
       },
       "Metadata": {
         "aws:cdk:path": "ServiceAStack/CDKMetadata/Default"

@@ -249,6 +249,12 @@ class ServiceAStack(cdk.Stack):
             resources=["*"],
             actions=["guardduty:CreateDetector","guardduty:CreateSampleFindings","guardduty:ListDetectors"]
         ))
+        gd_lambda.role.add_to_policy(iam_.PolicyStatement(
+            actions=["iam:CreateServiceLinkedRole"],
+            resources=["arn:aws:iam::*:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty*"],
+            conditions={"StringLike": {"iam:AWSServiceName": "guardduty.amazonaws.com"}}
+
+        ))
 
         # NICE to have: alternative to custom resource, to reduce stack creation time
         gd_init = cdk.CustomResource(self,"GDInit",
