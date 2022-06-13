@@ -2714,7 +2714,7 @@
     "CDKMetadata": {
       "Type": "AWS::CDK::Metadata",
       "Properties": {
-        "Analytics": "v2:deflate64:H4sIAAAAAAAAE1VSTW/CMAz9LdxDGOMwcRtUDCGhLSoT9zR1IaNJqsQBVVX/+9IP2nLy80f87Bcv6XK5pm+zT/5wc5HeFpUwFmh1Qi5uJMo045YrQLAkMtqh9QJJDM54K4BE3qFRo5vpKf7xWHhsUHiaSpRG16ThqdyKbr24AW65AyK5olVs8q5BY5nJpShb+gEdAjvXApg1mcyhJiDeaXUuRJM8s4gwK+8c4eQTDS3riGLjEX550lF08TG2cc4IyZv5hmLCfBKYxxa7A2vMN8d9IHnwfqYgTCiYhMIkvbfBoOFVgUbS1mVcQBh3p9PCSI198eCeQHgrsdxb44t2zJfAc/2pFDXJuUpSTqsjL8Gewbp+hxf/y2vxXG6KGVglnWu/JTcXF9qYy0D/xEHoe9ghZGPff5Fv5HdONWdipb4cpcPJnUyOpq5rwkq8Gr1Y0TX9mP05KefWa5QKaNzZf0t3jl2EAgAA"
+        "Analytics": "v2:deflate64:H4sIAAAAAAAAE1VSTW/CMAz9LdxDWMeJ26DaEBLaojJxT1MXMpqkShxQVfW/L/2gLSc/f8TPfnFEo2hD3xYf/OGWIrutamEs0PqEXNxInGvGLVeAYElstEPrBZIEnPFWAIm9Q6MmN9dz/OOx9Nii8DSTKI1uSMtTuzXdeXED3HEHRHJF68QUfYPWMlNIUXX0IzoEdq4FMGtyWUBDQLzT+lyKNnlmMWFW3jnCyacaOtYJJcYj/PK0p+jjU2zrnBGSt/ONxYT5NDBPLT4PrDXfHPeB5MGHmYIwoWAWCpMM3haDhlcFGklXl3MBYdxPnZVGahyKR/cEwluJ1d4aX3ZjvgSe68+laEjBVZpxWh95BfYM1g07vPhfXovncnPMwCrpXPcthbm40MZcRvonDkLfww4hm/jhi3wrv3OqPRMr9eUoHc7uZHY0TdMQVuHV6NWabmi0Xvw5KZfWa5QKaNLbf9kJk16FAgAA"
       },
       "Metadata": {
         "aws:cdk:path": "ServiceAStack/CDKMetadata/Default"
@@ -2732,7 +2732,7 @@
             {
               "Ref": "ServiceAInstance15E8E518"
             },
-            "?",
+            "?region=",
             {
               "Ref": "AWS::Region"
             }

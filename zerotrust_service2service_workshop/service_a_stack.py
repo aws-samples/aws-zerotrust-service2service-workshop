@@ -339,7 +339,7 @@ class ServiceAStack(cdk.Stack):
         )
         
         cdk.CfnOutput(self,"InstanceSession",
-            value=f'https://console.aws.amazon.com/systems-manager/session-manager/{main_instance.instance_id}?{cdk.Stack.of(self).region}'
+            value=f'https://console.aws.amazon.com/systems-manager/session-manager/{main_instance.instance_id}?region={cdk.Stack.of(self).region}'
         )
         
         cdk.CfnOutput(self,"InstanceRoleArn",
